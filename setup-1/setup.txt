@@ -1,0 +1,84 @@
+Configuration:
+  pc: vlan 10
+  switch: vlan 99
+  iprange: 10.0.0.0/8
+
+adresses, vlans and trunks:
+  R1:
+    interface GigabitEthernet0/0
+    ip address 10.0.0.1 255.255.255.0
+    duplex auto
+    speed auto
+    no shut
+    !
+    interface GigabitEthernet0/1
+    no ip address
+    duplex auto
+    speed auto
+    no shut
+    !
+    interface GigabitEthernet0/1.10
+    encapsulation dot1Q 10
+    ip address 10.0.10.1 255.255.255.0
+    !
+    interface GigabitEthernet0/1.99
+    encapsulation dot1Q 99
+    ip address 10.0.99.1 255.255.255.0
+  
+  R2:
+    interface GigabitEthernet0/0
+    ip address 10.0.0.2 255.255.255.0
+    duplex auto
+    speed auto
+    no shut
+    !
+    interface GigabitEthernet0/1
+    no ip address
+    duplex auto
+    speed auto
+    no shut
+    !
+    interface GigabitEthernet0/1.10
+    encapsulation dot1Q 10
+    ip address 10.0.10.1 255.255.255.0
+    !
+    interface GigabitEthernet0/1.99
+    encapsulation dot1Q 99
+    ip address 10.0.99.1 255.255.255.0
+  
+  S1: # Trunks and vlans
+    vlan 10
+    name Red
+    vlan 99
+    name Management
+    vlan 999
+    name Native
+    !
+    interface FastEthernet0/1
+    switchport trunk native vlan 999
+    switchport trunk allowed vlan 10,99,999
+    switchport mode trunk
+    !
+    interface FastEthernet0/2
+    switchport trunk native vlan 999
+    switchport trunk allowed vlan 10,99,999
+    switchport mode trunk
+    !
+    interface FastEthernet0/3
+    switchport access vlan 10
+    switchport mode access
+
+ssh on R1:
+  hostname R1
+  ip domain-name test.test
+  crypto key generate rsa
+  username admin password admin
+  line vty 0 4
+  login local
+  transport input ssh
+
+port-security:
+  # on interface to pc
+  switchport port-security
+  switchport port-security maximum 2 
+  switchport port-security mac-address sticky
